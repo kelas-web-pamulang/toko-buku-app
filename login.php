@@ -15,7 +15,7 @@
             align-items: center;
             height: 100vh;
             margin: 0;
-            font-family: 'Arial', sans-serif;
+            font-family:  'Arial', sans-serif;
         }
         .login-container {
             background: rgba(255, 255, 255, 0.9);
@@ -72,9 +72,18 @@
         </form>
         <a href="register.php" class="btn btn-secondary w-100 mt-2">Tidak punya akun? Register</a>
         <?php
-            ini_set('display_errors', '1');
+            ini_set('display_errors', '0');
             ini_set('display_startup_errors', '1');
             error_reporting(E_ALL);
+            require 'vendor/autoload.php';
+
+            \Sentry\init([
+                'dsn' => 'https://1e4fcb86d5f59b0483988c408869dece@o4507427977297920.ingest.us.sentry.io/4507427981295616',
+                // Specify a fixed sample rate
+                'traces_sample_rate' => 1.0,
+                // Set a sampling rate for profiling - this is relative to traces_sample_rate
+                'profiles_sample_rate' => 1.0,
+            ]);
 
             session_start();
             if (isset($_SESSION['login'])) {
