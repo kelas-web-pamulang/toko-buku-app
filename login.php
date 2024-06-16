@@ -70,6 +70,7 @@
             </div>
             <button type="submit" class="btn btn-primary w-100">Login</button>
         </form>
+        <a href="forgot_password.php" class="btn btn-secondary w-100 mt-2">Lupa password?</a>
         <a href="register.php" class="btn btn-secondary w-100 mt-2">Tidak punya akun? Register</a>
         <?php
             ini_set('display_errors', '0');
@@ -95,6 +96,24 @@
             $db = new ConfigDB();
             $conn = $db->connect();
 
+            // function checkNum($number) {
+            //     if($number>1) {
+            //       throw new Exception("Value must be 1 or below");
+            //     }
+            //     return true;
+            //   }
+            // function logError($error) {
+            //     error_log($error, 3, 'error.log');
+            //  }
+            //  try {
+            //     echo checkNum(2);	
+            // } catch (Exception $e) {
+            //     logError($e->getMessage());
+            //     echo 'Error : '.$e->getMessage();
+            // }
+                
+            // echo 'Finish';
+
             if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $email = $_POST['email'];
                 $password = $_POST['password'];
@@ -108,7 +127,7 @@
                     if ($isPasswordMatch) {
                         $_SESSION['login'] = true;
                         $_SESSION['userId'] = $user['id'];
-                        $_SESSION['userName'] = $user['full_name'];
+                        $_SESSION['userName'] = $user['nama'];
 
                         setcookie('clientId', $user['id'], time() + 86400, '/');
                         setcookie('clientSecret', hash('sha256', $user['email']), time() + 86400, '/');

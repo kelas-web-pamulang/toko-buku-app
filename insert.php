@@ -77,6 +77,23 @@ require_once 'config_db.php';
 
 $db = new ConfigDB();
 $conn = $db->connect();
+// function checkNum($number) {
+//     if($number>1) {
+//       throw new Exception("Value must be 1 or below");
+//     }
+//     return true;
+//   }
+// function logError($error) {
+//     error_log($error, 3, 'error.log');
+//  }
+//  try {
+//     echo checkNum(2);	
+// } catch (Exception $e) {
+//     logError($e->getMessage());
+//     echo 'Error : '.$e->getMessage();
+// }
+    
+// echo 'Finish';
 ?>
 <div class="container">
     <h1 class="text-center mb-4">Form Data Buku</h1>

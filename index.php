@@ -11,10 +11,15 @@
             background: url('https://images.unsplash.com/photo-1512820790803-83ca734da794') no-repeat center center fixed;
             background-size: cover;
             color: #fff;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
         }
         .overlay {
             background-color: rgba(0, 0, 0, 0.7);
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
@@ -24,6 +29,10 @@
         .content {
             position: relative;
             z-index: 1;
+            flex: 1;
+            padding-top: 70px; /* Height of the sticky header */
+            padding-bottom: 60px; /* Height of the sticky footer */
+            overflow-y: auto;
         }
         .card {
             background-color: rgba(255, 255, 255, 0.9);
@@ -32,6 +41,12 @@
         }
         .table th, .table td {
             vertical-align: middle;
+        }
+        .table th {
+            position: sticky;
+            top: 70px; /* Adjust based on the height of the navbar */
+            z-index: 2;
+            background-color: rgba(0, 123, 255, 0.7); /* Match the navbar color */
         }
         .search-form input, .search-form select, .search-form button {
             margin-right: 10px;
@@ -42,12 +57,19 @@
         .header-buttons .btn {
             width: 100px;
         }
+        .navbar-custom {
+            background-color: rgba(0, 123, 255, 0.7);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            width: 100%;
+        }
         footer {
             background-color: #343a40;
             color: white;
             padding: 20px;
             text-align: center;
-            position: absolute;
+            position: sticky;
             bottom: 0;
             width: 100%;
         }
@@ -73,9 +95,28 @@
 
     <div class="overlay"></div>
     <div class="container content">
+        <nav class="navbar navbar-expand-lg navbar-custom mb-3">
+            <div class="container-fluid">
+                <a class="navbar-brand text-white" href="#">Toko Buku Sinar Pamulang</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a id="logoutButton" href="logout.php" class="btn btn-danger">Logout</a>
+                        </li>
+                        <!-- <li class="nav-item">
+                        <a class="nav-link text-white" href="profile.php">Profil</a>
+                    </li> -->
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
         <div class="card shadow-sm">
             <div class="card-header bg-primary text-white text-center">
-                <h1>List Daftar Buku</h1>
+                <h1>Selamat datang, <?php echo htmlspecialchars($_SESSION['userName']); ?>!</h1>
             </div>
             <div class="card-body">
                 <div class="row mb-3">
@@ -131,24 +172,6 @@
                     $db = new ConfigDB();
                     $conn = $db->connect();
 
-                    // function checkNum($number) {
-                    //     if($number>1) {
-                    //       throw new Exception("Value must be 1 or below");
-                    //     }
-                    //     return true;
-                    //   }
-                    // function logError($error) {
-                    //     error_log($error, 3, 'error.log');
-                    //  }
-                    //  try {
-                    //     echo checkNum(2);	
-                    // } catch (Exception $e) {
-                    //     logError($e->getMessage());
-                    //     echo 'Error : '.$e->getMessage();
-                    // }
-                        
-                    // echo 'Finish';
-
                     $conditional = [];
                     if (isset($_GET['search'])) {
                         $search = $_GET['search'];
@@ -165,6 +188,22 @@
                             'deleted_at' => date('Y-m-d H:i:s')
                         ], $_GET['delete']);
                     }
+
+                    $perPage = 10;
+                    $currentPage = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+                    $offset = ($currentPage - 1) * $perPage;
+
+                    $countQuery = "SELECT COUNT(*) AS total FROM buku b WHERE b.deleted_at IS NULL";
+                    if (!empty($conditional)) {
+                        foreach ($conditional as $key => $value) {
+                            $countQuery .= " $key '$value'";
+                        }
+                    }
+
+                    $countResult = $conn->query($countQuery);
+                    $totalRows = $countResult->fetch_assoc()['total'];
+                    $totalPages = ceil($totalRows / $perPage);
+
                     $query = "SELECT b.id_buku, b.nama_buku, b.nama_penerbit, b.tahun_penerbit, g.nama_genre,
                     k.nama_kategori, b.stok, b.harga, b.created_at
                     FROM buku b
@@ -178,13 +217,14 @@
                         }
                     }
 
-                    $result = $conn->query($query);
-                    $totalRows = $result->num_rows;
+                    $query .= " LIMIT $offset, $perPage";
 
-                    if ($totalRows > 0) {
+                    $result = $conn->query($query);
+
+                    if ($result->num_rows > 0) {
                         foreach ($result as $key => $row) {
                             echo "<tr>";
-                            echo "<td>".($key + 1)."</td>";
+                            echo "<td>".($offset + $key + 1)."</td>";
                             echo "<td>".$row['nama_buku']."</td>";
                             echo "<td>".$row['nama_penerbit']."</td>";
                             echo "<td>".$row['tahun_penerbit']."</td>";
@@ -193,9 +233,8 @@
                             echo "<td>".$row['stok']."</td>";
                             echo "<td>".$row['harga']."</td>";
                             echo "<td>".$row['created_at']."</td>";
-                            // echo "<td><a class='btn btn-sm btn-warning' href='update.php?id=$row[id_buku]'>Edit</a></td>";
-                            echo "<td><a class='btn btn-sm btn-info' href='update.php?id=$row[id_buku]'>Update</a></td>";
-                            echo "<td><a class='btn btn-sm btn-danger delete-button' href='index.php?delete=$row[id_buku]'>Delete</a></td>";
+                            echo "<td><a class='btn btn-sm btn-info' href='update.php?id=".$row['id_buku']."'>Update</a></td>";
+                            echo "<td><a class='btn btn-sm btn-danger delete-button' href='index.php?delete=".$row['id_buku']."'>Delete</a></td>";
                             echo "</tr>";
                         }
                     } else {
@@ -206,9 +245,23 @@
                     ?>
                     </tbody>
                 </table>
-                <div class="d-flex justify-content-end mt-3">
-                    <a id="logoutButton" href="logout.php" class="btn btn-danger">Logout</a>
-                </div>
+                <nav>
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item <?php if($currentPage <= 1) echo 'disabled'; ?>">
+                            <a class="page-link" href="?page=<?php echo $currentPage - 1; ?>" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                        <?php for($page = 1; $page <= $totalPages; $page++): ?>
+                            <li class="page-item <?php if($currentPage == $page) echo 'active'; ?>"><a class="page-link" href="?page=<?php echo $page; ?>"><?php echo $page; ?></a></li>
+                        <?php endfor; ?>
+                        <li class="page-item <?php if($currentPage >= $totalPages) echo 'disabled'; ?>">
+                            <a class="page-link" href="?page=<?php echo $currentPage + 1; ?>" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
             </div>
         </div>
     </div>
