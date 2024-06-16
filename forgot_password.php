@@ -91,6 +91,23 @@
              // Set a sampling rate for profiling - this is relative to traces_sample_rate
              'profiles_sample_rate' => 1.0,
          ]);
+         // function checkNum($number) {
+        //     if($number>1) {
+        //       throw new Exception("Value must be 1 or below");
+        //     }
+        //     return true;
+        //   }
+        // function logError($error) {
+        //     error_log($error, 3, 'error.log');
+        //  }
+        //  try {
+        //     echo checkNum(2);	
+        // } catch (Exception $e) {
+        //     logError($e->getMessage());
+        //     echo 'Error : '.$e->getMessage();
+        // }
+            
+        // echo 'Finish';
 
             if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 require_once 'config_db.php';
