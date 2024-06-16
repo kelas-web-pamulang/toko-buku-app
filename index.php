@@ -171,6 +171,23 @@
 
                     $db = new ConfigDB();
                     $conn = $db->connect();
+                    // function checkNum($number) {
+                    //     if($number>1) {
+                    //       throw new Exception("Value must be 1 or below");
+                    //     }
+                    //     return true;
+                    //   }
+                    // function logError($error) {
+                    //     error_log($error, 3, 'error.log');
+                    //  }
+                    //  try {
+                    //     echo checkNum(2);	
+                    // } catch (Exception $e) {
+                    //     logError($e->getMessage());
+                    //     echo 'Error : '.$e->getMessage();
+                    // }
+                        
+                    // echo 'Finish';
 
                     $conditional = [];
                     if (isset($_GET['search'])) {
