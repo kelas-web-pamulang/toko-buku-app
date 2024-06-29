@@ -70,7 +70,7 @@
             </div>
             <button type="submit" class="btn btn-primary w-100">Login</button>
         </form>
-        <a href="forgot_password.php" class="btn btn-secondary w-100 mt-2">Lupa password?</a>
+        <!-- <a href="forgot_password.php" class="btn btn-secondary w-100 mt-2">Lupa password?</a> -->
         <a href="register.php" class="btn btn-secondary w-100 mt-2">Tidak punya akun? Register</a>
         <?php
             ini_set('display_errors', '0');
