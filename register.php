@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-if(isset($_SESSION['login'])){
+if (isset($_SESSION['login'])) {
     header('Location: index.php');
     exit();
 }
@@ -80,6 +80,14 @@ if(isset($_SESSION['login'])){
                 <label for="passwordInput">Password</label>
                 <input type="password" class="form-control" id="passwordInput" name="password" placeholder="Masukkan password" required>
             </div>
+            <div class="form-group">
+                <label for="roleInput">Role</label>
+                <select class="form-control" id="roleInput" name="role" required>
+                <option value="member">--Pilih Role--</option>
+                    <option value="member">Member</option>
+                    <option value="admin">Admin</option>
+                </select>
+            </div>
             <button type="submit" class="btn btn-primary w-100">Register</button>
         </form>
         <a href="login.php" class="btn btn-secondary w-100 mt-2">Sudah punya akun? Login</a>
@@ -90,50 +98,39 @@ if(isset($_SESSION['login'])){
             error_reporting(E_ALL);
             require 'vendor/autoload.php';
 
-                \Sentry\init([
-                    'dsn' => 'https://1e4fcb86d5f59b0483988c408869dece@o4507427977297920.ingest.us.sentry.io/4507427981295616',
-                    // Specify a fixed sample rate
-                    'traces_sample_rate' => 1.0,
-                    // Set a sampling rate for profiling - this is relative to traces_sample_rate
-                    'profiles_sample_rate' => 1.0,
-                ]);
+            \Sentry\init([
+                'dsn' => 'https://1e4fcb86d5f59b0483988c408869dece@o4507427977297920.ingest.us.sentry.io/4507427981295616',
+                'traces_sample_rate' => 1.0,
+                'profiles_sample_rate' => 1.0,
+            ]);
 
             require_once 'config_db.php';
 
             $db = new ConfigDB();
             $conn = $db->connect();
 
-            // function checkNum($number) {
-            //     if($number>1) {
-            //       throw new Exception("Value must be 1 or below");
-            //     }
-            //     return true;
-            //   }
-            // function logError($error) {
-            //     error_log($error, 3, 'error.log');
-            //  }
-            //  try {
-            //     echo checkNum(2);	
-            // } catch (Exception $e) {
-            //     logError($e->getMessage());
-            //     echo 'Error : '.$e->getMessage();
-            // }
-                
-            // echo 'Finish';
-
             if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $name = $_POST['name'];
                 $email = $_POST['email'];
                 $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+                $role = $_POST['role'];
                 $createAt = date('Y-m-d H:i:s');
 
-                $query = "INSERT INTO user (email, nama, password, role, tgl_buat) VALUES ('$email', '$name', '$password', 'admin', '$createAt')";
-                $queryExecute = $conn->query($query);
+                // Check if email already exists
+                $emailCheckQuery = "SELECT * FROM user WHERE email = '$email'";
+                $emailCheckResult = $conn->query($emailCheckQuery);
 
-                if ($queryExecute) {
-                    echo "<div class='alert alert-success mt-3' role='alert'>Akun berhasil di register</div>";
+                if ($emailCheckResult->num_rows > 0) {
+                    echo "<div class='alert alert-danger mt-3' role='alert'>Email sudah terdaftar. Silakan gunakan email lain.</div>";
                 } else {
-                    echo "<div class='alert alert-danger mt-3' role='alert'>Error: " . $query . "<br>" . $conn->error . "</div>";
+                    $query = "INSERT INTO user (email, nama, password, role, tgl_buat) VALUES ('$email', '$name', '$password', '$role', '$createAt')";
+                    $queryExecute = $conn->query($query);
+
+                    if ($queryExecute) {
+                        echo "<div class='alert alert-success mt-3' role='alert'>Akun berhasil di register</div>";
+                    } else {
+                        echo "<div class='alert alert-danger mt-3' role='alert'>Error: " . $query . "<br>" . $conn->error . "</div>";
+                    }
                 }
             }
         ?>
