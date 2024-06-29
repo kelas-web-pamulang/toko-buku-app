@@ -171,24 +171,25 @@
 
                     $db = new ConfigDB();
                     $conn = $db->connect();
-                    // function checkNum($number) {
-                    //     if($number>1) {
-                    //       throw new Exception("Value must be 1 or below");
-                    //     }
-                    //     return true;
-                    //   }
-                    // function logError($error) {
-                    //     error_log($error, 3, 'error.log');
-                    //  }
-                    //  try {
-                    //     echo checkNum(2);	
-                    // } catch (Exception $e) {
-                    //     logError($e->getMessage());
-                    //     echo 'Error : '.$e->getMessage();
-                    // }
-                        
-                    // echo 'Finish';
 
+                //  function checkNum($number) {
+                //     if($number>1) {
+                //       throw new Exception("Value must be 1 or below");
+                //     }
+                //     return true;
+                //   }
+                // function logError($error) {
+                //     error_log($error, 3, 'error.log');
+                //  }
+                //  try {
+                //     echo checkNum(2);	
+                // } catch (Exception $e) {
+                //     logError($e->getMessage());
+                //     echo 'Error : '.$e->getMessage();
+                // }
+                    
+                // echo 'Finish';
+echo $name;
                     $conditional = [];
                     if (isset($_GET['search'])) {
                         $search = $_GET['search'];
@@ -234,6 +235,7 @@
                         }
                     }
 
+                    $query .= " ORDER BY b.created_at DESC"; // Add this line to sort by created_at in descending order
                     $query .= " LIMIT $offset, $perPage";
 
                     $result = $conn->query($query);

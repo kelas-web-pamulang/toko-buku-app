@@ -112,31 +112,36 @@
         // Calculate new stock
         $new_stok = $current_stok + $stokTambah - $stokKurang;  // Change stock based on user input
 
-        $data_buku = [
-            'nama_buku' => $nama,
-            'nama_penerbit' => $namaPenerbit,
-            'tahun_penerbit' => $tahunPenerbit,
-            'id_genre' => $genre,
-            'id_kategori' => $kategori,
-            'stok' => $new_stok,
-            'harga' => $harga,
-        ];
-
-        $conn->begin_transaction();
-
-        // Prepare and bind
-        $stmt = $conn->prepare("UPDATE buku SET nama_buku=?, nama_penerbit=?, tahun_penerbit=?, id_genre=?, id_kategori=?, stok=?, harga=? WHERE id_buku=?");
-        $stmt->bind_param("sssiiidi", $nama, $namaPenerbit, $tahunPenerbit, $genre, $kategori, $new_stok, $harga, $id_buku);
-
-        if ($stmt->execute()) {
-            $conn->commit();
-            echo "<div class='alert alert-success mt-3' role='alert'>Data berhasil diperbaharui</div>";
+        // Check if the new stock is not negative
+        if ($new_stok < 0) {
+            echo "<div class='alert alert-danger mt-3' role='alert'>Error: Stok tidak boleh kurang dari nol.</div>";
         } else {
-            $conn->rollback();
-            echo "<div class='alert alert-danger mt-3' role='alert'>Error: " . $stmt->error . "</div>";
+            $data_buku = [
+                'nama_buku' => $nama,
+                'nama_penerbit' => $namaPenerbit,
+                'tahun_penerbit' => $tahunPenerbit,
+                'id_genre' => $genre,
+                'id_kategori' => $kategori,
+                'stok' => $new_stok,
+                'harga' => $harga,
+            ];
+
+            $conn->begin_transaction();
+
+            // Prepare and bind
+            $stmt = $conn->prepare("UPDATE buku SET nama_buku=?, nama_penerbit=?, tahun_penerbit=?, id_genre=?, id_kategori=?, stok=?, harga=? WHERE id_buku=?");
+            $stmt->bind_param("sssiiidi", $nama, $namaPenerbit, $tahunPenerbit, $genre, $kategori, $new_stok, $harga, $id_buku);
+
+            if ($stmt->execute()) {
+                $conn->commit();
+                echo "<div class='alert alert-success mt-3' role='alert'>Data berhasil diperbaharui</div>";
+            } else {
+                $conn->rollback();
+                echo "<div class='alert alert-danger mt-3' role='alert'>Error: " . $stmt->error . "</div>";
+            }
+            $stmt->close();
+            $result = $db->select("buku", ['AND id_buku=' => $id_buku]);
         }
-        $stmt->close();
-        $result = $db->select("buku", ['AND id_buku=' => $id_buku]);
     } else {
         $result = $db->select("buku", ['AND id_buku=' => $id_buku]);
     }
@@ -188,11 +193,11 @@
                 <input type="number" class="form-control" id="currentStokInput" name="current_stok" readonly value="<?php echo htmlspecialchars($buku['stok']); ?>">
             </div>
             <div class="form-group">
-                <label for="stokTambahInput">Tambah Stok</label>
+                <label for="stokTambahInput">Stok Masuk</label>
                 <input type="number" class="form-control" id="stokTambahInput" name="stok_tambah" placeholder="Masukkan jumlah stok tambahan" value="0">
             </div>
             <div class="form-group">
-                <label for="stokKurangInput">Kurangi Stok</label>
+                <label for="stokKurangInput">Stok Keluar</label>
                 <input type="number" class="form-control" id="stokKurangInput" name="stok_kurang" placeholder="Masukkan jumlah stok pengurangan" value="0">
             </div>
             <div class="form-group">
